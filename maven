@@ -1,3 +1,4 @@
-yum install maven -y
+#maven and tree installation
+yum install maven tree -y
 
 mvn -v
