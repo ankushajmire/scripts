@@ -1,4 +1,18 @@
-#maven and tree installation
+# maven and tree installation
 yum install maven tree -y
 
+# to check version
 mvn -v
+
+# to validate
+mvn validate
+
+# to create class file
+mvn compile
+
+# to test
+mvn test
+
+# to create .war file
+mvn package
+
