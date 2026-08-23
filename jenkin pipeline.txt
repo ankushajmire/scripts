@@ -1,0 +1,66 @@
+pipeline{
+    agent any
+    triggers {
+        githubPush() 
+    }
+    stages{
+        stage('Checkout'){
+            steps{
+                git branch:'main', url:'https://github.com/ankushajmire/java-project-maven.git'
+            }
+        }
+        stage('test'){
+            steps{
+                sh 'mvn test'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarQube') {
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar'
+                }
+            }
+        }
+        stage('build'){
+            steps{
+                sh 'mvn clean package'
+            }
+        }
+        stage('nexus upload'){
+            steps{
+                nexusArtifactUploader artifacts: [[artifactId: 'myapp', classifier: '', file: 'target/myapp.war', type: '.war']], credentialsId: 'nexus', groupId: 'in.reyaz', nexusUrl: '13.232.76.60:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'hotstar', version: '8.3.3-SNAPSHOT' }
+        }
+        stage('upload to s3'){
+            steps {
+                s3Upload consoleLogLevel: 'INFO', 
+                dontSetBuildResultOnFailure: false, 
+                dontWaitForConcurrentBuildCompletion: false, 
+                entries: [[bucket: 'complitecicdprojecct',
+		            excludedFile: '', 
+                    flatten: false, 
+                    gzipFiles: false, 
+                    keepForever: false, 
+                    managedArtifacts: false, 
+                    noUploadOnFailure: false, 
+                    selectedRegion: 'ap-south-1', 
+                    showDirectlyInBrowser: false, 
+                    sourceFile: '**/*.war', 
+                    storageClass: 'STANDARD', 
+                    uploadFromSlave: false, 
+                    useServerSideEncryption: false]], 
+                    pluginFailureResultConstraint: 'FAILURE', 
+                    profileName: 's3save', userMetadata: []
+            }
+        }
+       stage('deploy to tomcat'){
+            steps{
+                deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcatcreads', path: '', url: 'http://13.234.113.137:8080')], contextPath: 'mywebapp', war: '**/*.war'
+            }
+        }
+        
+    }
+}
+
+
+sonarqubetoken
+d1959fd72c87b82bd951e01f800e9d121f221d67
