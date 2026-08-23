@@ -1,0 +1,31 @@
+---
+- name: To check os type and install git using condition
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Installing on Amazon Linux 2023 and RedHat
+      ansible.builtin.yum: 
+        name: git
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Installing on Ubuntu/Debian
+      ansible.builtin.apt:
+        name: git
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+
+
+*************************OR*******************************
+---
+- name: Install git across different operating systems
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install git using the system package manager
+      ansible.builtin.package:
+        name: git
+        state: present
+
